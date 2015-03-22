@@ -1,0 +1,78 @@
+{
+  "atoms": [
+    {
+      "id": 1,
+      "element": "stdlib readHttp",
+      "config": {
+        "url": "http://pastebin.com/raw.php?i=qc0z66VP"
+      }
+    },
+    {
+      "id": 3,
+      "element": "stdlib splitByByte",
+      "config": {
+      }
+    },
+    {
+      "id": 5,
+      "element": "stdlib accumAdd",
+      "config": {
+      }
+    },
+    {
+      "id": 7,
+      "element": "stdlib updateRedisKey",
+      "config": {
+        "addr": "192.168.59.103:49153",
+        "key": "output"
+      }
+    }
+  ],
+  "links": [
+    {
+      "id": 2,
+      "from": {
+        "atomID": 1,
+        "port": {
+          "name": "output"
+        }
+      },
+      "to": {
+        "atomID": 3,
+        "port": {
+          "name": "input"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "from": {
+        "atomID": 3,
+        "port": {
+          "name": "output"
+        }
+      },
+      "to": {
+        "atomID": 5,
+        "port": {
+          "name": "input"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "from": {
+        "atomID": 5,
+        "port": {
+          "name": "output"
+        }
+      },
+      "to": {
+        "atomID": 7,
+        "port": {
+          "name": "input"
+        }
+      }
+    }
+  ]
+}
