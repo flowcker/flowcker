@@ -28,7 +28,12 @@ var log = logging.MustGetLogger("flowcker_runtime")
 type AtomLauncher func(atom *fc.Atom) (string, error)
 
 func Run(molecule *fc.Molecule, atomLauncher AtomLauncher) {
+	if len(molecule.Atoms) == 0 {
+		log.Fatal("Malformed molecule")
+	}
+
 	for i := range molecule.Atoms {
+		log.Notice("Launching Atom %d with element %s", molecule.Atoms[i].ID, molecule.Atoms[i].Element)
 		// Launch atom and find addr
 		molecule.Atoms[i].Addr, _ = atomLauncher(&molecule.Atoms[i])
 	}
@@ -42,4 +47,5 @@ func Run(molecule *fc.Molecule, atomLauncher AtomLauncher) {
 	atom, _ := control.LaunchTCP(molecule, controlIP+":0")
 
 	<-atom.CloseChannel()
+	log.Notice("Control atom exited")
 }

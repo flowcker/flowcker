@@ -16,6 +16,7 @@
 package docker
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -46,6 +47,22 @@ func getClient() (client *docker.Client, err error) {
 	return client, err
 }
 
+func pullImage(client *docker.Client, image string) error {
+	log.Info("Pulling image %s", image)
+
+	var buff bytes.Buffer
+	err := client.PullImage(docker.PullImageOptions{Repository: image, OutputStream: &buff, RawJSONStream: true}, docker.AuthConfiguration{})
+	if err != nil {
+		return err
+	}
+
+	log.Debug(buff.String())
+
+	log.Info("Image %s pulled", image)
+
+	return nil
+}
+
 func LaunchAtom(atom *fc.Atom) (string, error) {
 	if os.Getenv("DOCKER_HOST") == "" {
 		log.Fatal("DOCKER_HOST not set")
@@ -63,6 +80,21 @@ func LaunchAtom(atom *fc.Atom) (string, error) {
 	client, err := getClient()
 	if err != nil {
 		panic(err)
+	}
+
+	log.Notice("Launching Atom with docker image %s", element[0])
+
+	_, err = client.InspectImage(element[0])
+	if err == docker.ErrNoSuchImage {
+		log.Info("Image not found, pulling")
+		err = pullImage(client, element[0])
+		if err != nil {
+			panic(err)
+		}
+	} else if err != nil {
+		panic(err)
+	} else {
+		log.Info("Image already present")
 	}
 
 	container, err := client.CreateContainer(docker.CreateContainerOptions{Config: &docker.Config{Image: element[0], Cmd: element[1:], ExposedPorts: map[docker.Port]struct{}{"3000": {}}}})
