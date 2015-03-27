@@ -20,9 +20,11 @@ const (
 	DATA IPType = 0
 	// DISCONNECT - Link is closed and source will not send anymore
 	DISCONNECT IPType = 13
+	// CONTROL - IP contains control data
+	CONTROL IPType = 20
 )
 
-// IPacketType contains IP type
+// IPType contains IP type
 type IPType uint32
 
 // IP interface for information packages

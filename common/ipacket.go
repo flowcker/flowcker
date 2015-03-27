@@ -86,12 +86,17 @@ func (p iPacketOutboundAll) GetAll() bool {
 
 // NewIP creates a DATA IP
 func NewIP(data []byte) IP {
-	return &IPacket{Type: DATA, Data: data}
+	return NewIPWithType(data, DATA)
 }
 
 // NewDisconnectIP creates a DISCONNECT IP
 func NewDisconnectIP() IP {
-	return &IPacket{Type: DISCONNECT, Data: []byte{}}
+	return NewIPWithType([]byte{}, DISCONNECT)
+}
+
+// NewIPWithType creates an IP with arbitrary type
+func NewIPWithType(data []byte, ipType IPType) IP {
+	return &IPacket{Type: ipType, Data: data}
 }
 
 // NewIPOut creates a IP to send outgoing
