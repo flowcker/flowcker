@@ -15,8 +15,14 @@
 
 package atom
 
-import "encoding/json"
-import fc "github.com/flowcker/flowcker/common"
+import (
+	"encoding/json"
+	"errors"
+)
+import (
+	"github.com/davecgh/go-spew/spew"
+	fc "github.com/flowcker/flowcker/common"
+)
 
 // ControlMessage is sent to/from ControlAtom
 type ControlMessage struct {
@@ -32,7 +38,25 @@ type AtomSetup struct {
 	fc.Molecule
 }
 
-// JSONDecode decodes a ControlMessage
-func (msg *ControlMessage) JSONDecode(data []byte) {
-	json.Unmarshal(data, msg)
+func NewIPControlMessage(cmtype string, cmdata []byte) fc.IP {
+	var msg ControlMessage
+	msg.Type = cmtype
+	msg.Data = cmdata
+
+	data, err := json.Marshal(msg)
+	if err != nil {
+		spew.Dump(msg)
+		panic(err)
+	}
+
+	return fc.NewIPWithType(data, fc.CONTROL)
+}
+
+func ExtractControlMessage(ip fc.IP) (msg ControlMessage, err error) {
+	if ip.GetType() != fc.CONTROL {
+		return msg, errors.New("Not a control IP")
+	}
+	err = json.Unmarshal(ip.GetData(), &msg)
+
+	return msg, err
 }

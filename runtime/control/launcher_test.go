@@ -20,10 +20,10 @@ import (
 	"sync"
 	"testing"
 
+	stdlib "github.com/flowcker/flowcker-stdlib/lib"
 	"github.com/flowcker/flowcker/atom"
 	fc "github.com/flowcker/flowcker/common"
 	"github.com/flowcker/flowcker/runtime/control"
-	"github.com/flowcker/flowcker/stdlib"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,13 +32,12 @@ func TestBasicControl(t *testing.T) {
 	setupTestLogging()
 
 	var molecule fc.Molecule
-	molecule.AddAtom("control", "", "")
-	//molecule.Atoms = append(molecule.Atoms, fc.Atom{ID: 0, Element: "control", Config: &json.RawMessage{'{', '}'}, Addr: ""})
+
 	molecule.Atoms = append(molecule.Atoms, fc.Atom{ID: 1, Element: "identity", Config: &json.RawMessage{'{', '}'}, Addr: ""})
 	molecule.Atoms = append(molecule.Atoms, fc.Atom{ID: 2, Element: "tester", Config: &json.RawMessage{'{', '}'}, Addr: ""})
 
 	_, atomPortsServer := atom.LaunchTCP(stdlib.Identity, "127.0.0.1:0")
-	molecule.Atoms[1].Addr = atomPortsServer.GetAddr().String()
+	molecule.Atoms[0].Addr = atomPortsServer.GetAddr().String()
 
 	var barrier sync.WaitGroup
 	barrier.Add(1)
@@ -58,12 +57,8 @@ func TestBasicControl(t *testing.T) {
 		}()
 
 		return out, nil
-	},
-		"127.0.0.1:0")
-
-	molecule.Atoms[2].Addr = atomPortsServer.GetAddr().String()
-
-	//	control.AddControlAtomLinks(&molecule)
+	}, "127.0.0.1:0")
+	molecule.Atoms[1].Addr = atomPortsServer.GetAddr().String()
 
 	molecule.Links = append(molecule.Links, fc.Link{
 		ID: 400,

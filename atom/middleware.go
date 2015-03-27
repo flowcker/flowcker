@@ -40,15 +40,15 @@ func AtomSetupMiddleware(r *Atom, input chan fc.IPInbound) chan fc.IPInbound {
 
 	go func() {
 		for incoming := range input {
-			if incoming.GetTo().Name == "control" {
+			if incoming.GetType() == fc.CONTROL && incoming.GetTo().Name == "control" {
 				log.Debug("AtomSetupMiddleware: received control message")
-				var msg ControlMessage
 
-				err := json.Unmarshal(incoming.GetData(), &msg)
+				msg, err := ExtractControlMessage(incoming)
 				if err != nil {
 					spew.Dump(incoming)
-					panic("Error unmarshalling control package")
+					panic(err)
 				}
+
 				if msg.Type == "AtomSetup" {
 					log.Debug("AtomSetupMiddleware: received AtomSetup")
 					var atomSetup AtomSetup
@@ -79,11 +79,13 @@ func AtomStartMiddleware(r *Atom, input chan fc.IPInbound) chan fc.IPInbound {
 
 	go func() {
 		for incoming := range input {
-			if incoming.GetTo().Name == "control" {
+			if incoming.GetType() == fc.CONTROL && incoming.GetTo().Name == "control" {
 				log.Debug("AtomStartMiddleware: received control message")
-				var msg ControlMessage
-
-				msg.JSONDecode(incoming.GetData())
+				msg, err := ExtractControlMessage(incoming)
+				if err != nil {
+					spew.Dump(incoming)
+					panic(err)
+				}
 				if msg.Type == "AtomStart" {
 					log.Debug("AtomStartMiddleware: received AtomStart")
 					r.StartElement()

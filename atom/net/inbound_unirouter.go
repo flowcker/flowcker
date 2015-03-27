@@ -15,14 +15,19 @@
 
 package net
 
-import fc "github.com/flowcker/flowcker/common"
+import (
+	"github.com/davecgh/go-spew/spew"
+	fc "github.com/flowcker/flowcker/common"
+)
 
 // InboundUnirouter converts incoming IPacketRouted into IPacketInbound
 func InboundUnirouter(in chan *iPacketWire) chan fc.IPInbound {
 	out := make(chan fc.IPInbound)
 	go func() {
 		for incoming := range in {
-			out <- fc.NewIPIn(incoming.Data, incoming.Port)
+			p := fc.NewIPIn(fc.NewIPWithType(incoming.Data, incoming.Type), incoming.Port)
+			log.Debug("InboundUnirouter packet: \n%s", spew.Sdump(p))
+			out <- p
 		}
 	}()
 	return out
